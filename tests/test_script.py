@@ -1,20 +1,13 @@
-from app.main import encrypt_phone
-
-# def test__encrypt__on_any_input__output_should_be_different_than_input():
-#     input = "any_string"
-#     output = encrypt(input)
-#     assert input != output
-
-# def test__encrypt__when_input_is_hello_return_should_be_0984502ihfpwruhfo459uf():
-#     input = "hello"
-#     output = encrypt(input)
-#     assert output == "0984502ihfpwruhfo459uf"
+from app.main import read_file
 
 
-# para probar la función encrypt que hace uso de un servicio web para el cifrado se debe probar es que la función haga el llamado http correspondiente
-def test_any():
-    input = "any"
-    #_ = encrypt_phone(input)
-    assert True
+def test__read_file__after_file_reading__output_cardinal_should_be_103949():
+    input = "Phones.xlsx"
+    output = read_file(input)
+    assert len(output) == 103949
 
+def test__read_file__after_file_reading__output_dict_should_hold_F_column():
+    input = "Phones.xlsx"
+    output = read_file(input)
+    assert output["F7"] == "04811118843"[-10:]
 
