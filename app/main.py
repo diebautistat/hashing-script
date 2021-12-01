@@ -1,6 +1,8 @@
 from typing import Any, Dict
 import pandas as pd
 import requests
+from requests import HTTPError
+from app.exceptions import ApiCallException, ApiResponseException
 
     
 
@@ -16,11 +18,16 @@ def write_to_file(file_name: str, data: Dict) -> None:
     pass
 
 def encrypt_phone(phone: str) -> str:
-    response = requests.get("http://localhost:8080/hash/phone/" + phone)
-    if response:        
-        return response.text
-    return "" #TODO Catch exceptions and act accordingly
-
+    try:
+        response = requests.get("http://localhost:8080/hash/phone/" + phone)
+        if response.status_code == 200:        
+            return response.text
+        else:
+            raise ApiResponseException("Response code is: " + str(response.status_code))
+    except HTTPError as error:
+        raise ApiCallException(error) from error
+    except Exception as error:
+        raise ApiCallException(error) from error
 
 if __name__ == '__main__':
     output = read_file("Phones.xlsx")

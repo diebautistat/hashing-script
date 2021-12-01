@@ -1,8 +1,9 @@
 from app.main import read_file, encrypt_values, encrypt_phone
 import pytest
 import requests
-
-
+from requests.models import Response
+from requests import HTTPError
+from app.exceptions import ApiCallException, ApiResponseException
 
 def test__read_file__after_file_reading__output_cardinal_should_be_103949():
     input = "Phones.xlsx"
@@ -28,6 +29,25 @@ def test__encrypt_values___phone_to_encrypt_is_passed_as_parameter__response_con
     assert encrypted_rows["H2"]  == "LOPOJSNCU"
 
 def test__encrypt_phone__phone_is_encrypted__encrypt_endpoint_should_be_called(mocker):
-    instance = mocker.patch("requests.get")
+    response = Response()
+    response.status_code = 200
+    instance = mocker.patch("requests.get", return_value=response)
     encrypt_phone("1234567890")
     instance.assert_called_with("http://localhost:8080/hash/phone/1234567890")
+
+def test__encrypt_phone__http_error_is_catched__raises_api_call_exception(mocker):
+    instance = mocker.patch("requests.get", side_effect=HTTPError)
+    with pytest.raises(ApiCallException):
+        encrypt_phone("1234567890")
+
+def test__encrypt_phone__generic_exception_is_catched__raises_api_call_exception(mocker):
+    mocker.patch("requests.get", side_effect=Exception)
+    with pytest.raises(ApiCallException):
+        encrypt_phone("1234567890")
+
+def test__encrypt_phone__status_code_is_differente_than_200__raises_api_response_exception(mocker):
+    response = Response()
+    response.status_code = 500
+    mocker.patch("requests.get", return_value=response)
+    with pytest.raises(ApiResponseException):
+        encrypt_phone("1234567890")
