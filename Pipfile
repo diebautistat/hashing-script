@@ -9,6 +9,8 @@ requests = "*"
 rsa = "*"
 pycryptodome = "*"
 openpyxl = "*"
+pandas = "*"
+pytest-mock = "*"
 
 [dev-packages]
 pytest = "*"
