@@ -14,8 +14,11 @@ def read_file(file_name: str) -> Dict:
 def encrypt_values(rows: Dict) -> Dict:
     return {"H" + k[1:]:encrypt_phone(v) for k, v in rows.items()}
 
-def write_to_file(file_name: str, data: Dict) -> None:
-    pass
+def write_to_file(file_name: str, data: Dict, output_file_name: str) -> None:
+    df = pd.read_excel(file_name)
+    df["result"] = data.values()
+    df.to_excel(output_file_name)
+
 
 def encrypt_phone(phone: str) -> str:
     try:
@@ -26,8 +29,13 @@ def encrypt_phone(phone: str) -> str:
             raise ApiResponseException("Response code is: " + str(response.status_code))
     except HTTPError as error:
         raise ApiCallException(error) from error
+    except ApiResponseException as error:
+        raise error
     except Exception as error:
         raise ApiCallException(error) from error
 
 if __name__ == '__main__':
-    output = read_file("Phones.xlsx")
+    input_file = "Phones.xlsx"
+    data = read_file(input_file)
+    data = encrypt_values(data)
+    write_to_file(input_file, data, "Phones_test_out.xlsx")

@@ -1,9 +1,10 @@
-from app.main import read_file, encrypt_values, encrypt_phone
+from app.main import read_file, encrypt_values, encrypt_phone, write_to_file
 import pytest
 import requests
 from requests.models import Response
 from requests import HTTPError
 from app.exceptions import ApiCallException, ApiResponseException
+import pandas as pd
 
 def test__read_file__after_file_reading__output_cardinal_should_be_103949():
     input = "Phones.xlsx"
@@ -51,3 +52,19 @@ def test__encrypt_phone__status_code_is_differente_than_200__raises_api_response
     mocker.patch("requests.get", return_value=response)
     with pytest.raises(ApiResponseException):
         encrypt_phone("1234567890")
+
+def test__encrypt_phone__when_file_written__there_should_be_a_new_column_called_result():
+    input_data = {f"H{i}":str(i) for i in range(103949)}
+    input_file = "Phones_test.xlsx"
+    output_file = "Phones_test_output.xlsx"
+    write_to_file(input_file, input_data, output_file)
+    df = pd.read_excel(output_file)
+    assert "result" in df.columns
+
+def test__encrypt_phone__when_file_written__there_should_be_a_new_cellH2_with_hashing_result():
+    input_data = {f"H{i}":str(i) for i in range(103949)}
+    input_file = "Phones_test.xlsx"
+    output_file = "Phones_test_output.xlsx"
+    write_to_file(input_file, input_data, output_file)
+    df = pd.read_excel(output_file)
+    assert "103948" in [str(value) for value in df["result"]]
